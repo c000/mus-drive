@@ -19,6 +19,7 @@ executable mus-drive
   -- other-modules:       
   -- other-extensions:    
   build-depends:       base >=4.7 && <4.8
+                     , transformers
                      , lens
                      , OpenAL
                      , ALUT
