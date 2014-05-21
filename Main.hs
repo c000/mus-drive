@@ -1,10 +1,12 @@
 import Control.Concurrent
+import Control.Exception
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Maybe
 import Sound.ALUT
 import System.IO
 
 import MusDrive.OpenAL
+import MusDrive.Types
 
 main :: IO ()
 main = do
@@ -17,7 +19,13 @@ main = do
         print d
         loopingMode source $= Looping
         buffer source $= Just sine
+        tid <- forkIO myForkFunction
         mainLoop source
+        killThread tid
+
+myForkFunction = bracket_ (putStrLn "Begin") (putStrLn "End") loop
+  where
+    loop = threadDelay (10^6`div`60) >> loop
 
 mainLoop source = do
     c <- getChar
