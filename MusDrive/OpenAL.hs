@@ -7,11 +7,12 @@ import Data.Int
 import Foreign.Marshal.Array
 import Foreign.Ptr
 import Sound.OpenAL
+import Linear.V2
 
 data SoundList = M8  [Word8]
                | M16 [Word16]
-               | S8  [Word16]
-               | S16 [Word32]
+               | S8  [V2 Word8]
+               | S16 [V2 Word16]
   deriving (Eq, Show, Read)
 
 bufferSound :: Buffer -> IO SoundList

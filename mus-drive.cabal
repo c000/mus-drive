@@ -21,6 +21,7 @@ executable mus-drive
   build-depends:       base >=4.7 && <4.8
                      , transformers
                      , lens
+                     , linear
                      , OpenAL
                      , ALUT
   -- hs-source-dirs:      
