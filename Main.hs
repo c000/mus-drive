@@ -4,6 +4,8 @@ import Control.Monad.Trans.Maybe
 import Sound.ALUT
 import System.IO
 
+import MusDrive.OpenAL
+
 main :: IO ()
 main = do
     hSetBuffering stdin NoBuffering
