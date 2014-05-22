@@ -7,6 +7,7 @@ import System.IO
 
 import MusDrive.OpenAL
 import MusDrive.Types
+import MusDrive.Keyboard
 
 main :: IO ()
 main = do
@@ -42,24 +43,3 @@ mainLoop source = do
         print result
         next
     next = mainLoop source
-
-key2Chromatic :: (Num a, Monad m) => Char -> m a
-key2Chromatic 'z' = return (-9)
-key2Chromatic 's' = return (-8)
-key2Chromatic 'x' = return (-7)
-key2Chromatic 'd' = return (-6)
-key2Chromatic 'c' = return (-5)
-key2Chromatic 'v' = return (-4)
-key2Chromatic 'g' = return (-3)
-key2Chromatic 'b' = return (-2)
-key2Chromatic 'h' = return (-1)
-key2Chromatic 'n' = return ( 0)
-key2Chromatic 'j' = return ( 1)
-key2Chromatic 'm' = return ( 2)
-key2Chromatic ',' = return ( 3)
-key2Chromatic 'l' = return ( 4)
-key2Chromatic '.' = return ( 5)
-key2Chromatic ';' = return ( 6)
-key2Chromatic '/' = return ( 7)
-key2Chromatic '\\'= return ( 8)
-key2Chromatic _ = fail "Out of chromatic keyboard region"
