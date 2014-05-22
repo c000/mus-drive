@@ -8,6 +8,7 @@ import System.IO
 import MusDrive.OpenAL
 import MusDrive.Types
 import MusDrive.Keyboard
+import MusDrive.Manager
 
 main :: IO ()
 main = do
