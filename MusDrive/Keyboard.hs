@@ -42,3 +42,4 @@ key2Chromatic '@' = return (20)
 key2Chromatic '^' = return (21)
 key2Chromatic '[' = return (22)
 key2Chromatic _ = fail "Out of chromatic keyboard region"
+{-# LANGUAGE key2Chromatic #-}

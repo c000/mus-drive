@@ -22,7 +22,9 @@ main = do
         loopingMode source $= Looping
         buffer source $= Just sine
         tid <- forkIO myForkFunction
+        manager <- runManager
         mainLoop source
+        manager `sendCommand` CommandTerminate
         killThread tid
 
 myForkFunction = bracket_ (putStrLn "Begin") (putStrLn "End") loop
