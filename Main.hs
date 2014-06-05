@@ -2,36 +2,28 @@ import Control.Concurrent
 import Control.Exception
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Maybe
-import Sound.ALUT
+import qualified Sound.ALUT as AL
 import System.IO
 
 import MusDrive.OpenAL
 import MusDrive.Types
 import MusDrive.Keyboard
 import MusDrive.Manager
+import MusDrive.OpenAL.Types hiding (pitch)
 
 main :: IO ()
 main = do
     hSetBuffering stdin NoBuffering
     hSetEcho stdin False
-    runALUT "" [] $ \argc args -> do
-        sine <- createBuffer $ Sine 440.0 0.0 (1/440)
-        source <- genObjectName
-        d <- get $ bufferData sine
-        print d
-        loopingMode source $= Looping
-        buffer source $= Just sine
-        tid <- forkIO myForkFunction
+    AL.runALUT "" [] $ \argc args -> do
+        sine <- AL.createBuffer $ AL.Sine 440.0 0.0 (1/440)
+        s <- makeBundledSource 440 sine
+        loop s $= Looping
         manager <- runManager
-        mainLoop source
+        mainLoop s manager
         manager `sendCommand` CommandTerminate
-        killThread tid
 
-myForkFunction = bracket_ (putStrLn "Begin") (putStrLn "End") loop
-  where
-    loop = threadDelay (10^6`div`60) >> loop
-
-mainLoop source = do
+mainLoop s m = do
     c <- getChar
     case c of
         '\ESC' -> return ()
@@ -40,9 +32,8 @@ mainLoop source = do
     exec key = do
         result <- runMaybeT $ do
             chromatic <- key2Chromatic key
-            liftIO $ pitch source $= 2 ** (chromatic / 12)
-            liftIO $ play [source]
+            liftIO $ m `sendCommand` CommandPlayTone s (Tone chromatic)
             return chromatic
         print result
         next
-    next = mainLoop source
+    next = mainLoop s m

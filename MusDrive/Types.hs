@@ -1,20 +1,33 @@
-{-# LANGUAGE FlexibleContexts, MultiParamTypeClasses #-}
+{-# LANGUAGE FlexibleContexts, MultiParamTypeClasses, TemplateHaskell #-}
 
 module MusDrive.Types
     where
 
 import Control.Concurrent
 import Control.Concurrent.MVar
+import Control.Lens.TH
 
 import Data.Foldable as F
 import Data.Maybe (maybeToList)
 import Data.Traversable as T
 import Data.Functor.Identity
 
+import Sound.OpenAL (ALfloat)
+import MusDrive.OpenAL.Types
+
 --
 -- Music types
 --
-type Note = Int
+newtype Tone a = Tone a deriving (Eq, Ord, Show)
+makeIso ''Tone
+
+frequencyBase :: (Floating a, Real b) => a -> Tone b -> a
+frequencyBase base (Tone x) = base * 2 ** (realToFrac x / 12)
+{-# SPECIALIZE frequencyBase :: ALfloat -> Tone ALfloat -> ALfloat #-}
+
+frequency :: (Floating a, Real b) => Tone b -> a
+frequency = frequencyBase 440
+{-# SPECIALIZE frequency :: Tone ALfloat -> ALfloat #-}
 
 data GScore t n = Note n | Sequence (t (GScore t n))
 
@@ -27,10 +40,10 @@ instance (Show n, Foldable t) => Show (GScore t n) where
     show (Note n) = " " ++ show n ++ " "
     show (Sequence xs) = "[" ++ foldMap show xs ++ "]"
 
-type Score = GScore [] Note
+type Score = GScore [] (Tone ALfloat)
 
 testScore :: Score
-testScore = Sequence [Note 1, Note 2, Sequence [Note 4, Note 5], Note 3]
+testScore = fmap Tone $ Sequence [Note 1, Note 2, Sequence [Note 4, Note 5], Note 3]
 
 --
 -- Managers
@@ -38,6 +51,7 @@ testScore = Sequence [Note 1, Note 2, Sequence [Note 4, Note 5], Note 3]
 data Manager = Manager (MVar Command) ThreadId
 
 data Command = CommandTerminate
+             | CommandPlayTone BufferedSource (Tone ALfloat)
 
 --
 -- Communication channels
