@@ -19,9 +19,8 @@ main = do
         sine <- AL.createBuffer $ AL.Sine 440.0 0.0 (1/440)
         s <- makeBundledSource 440 sine
         loop s $= Looping
-        manager <- runManager
-        mainLoop s manager
-        manager `sendCommand` CommandTerminate
+        bracket runManager (`sendCommand` CommandTerminate) $ \manager -> do
+            mainLoop s manager
 
 mainLoop s m = do
     c <- getChar
