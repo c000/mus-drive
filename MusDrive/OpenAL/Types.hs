@@ -21,7 +21,7 @@ stateGet :: HasGetter g => g a -> IO a
 stateGet = AL.get
 
 -- | 'BundledSource' is a pair of 'Source', signal frequency and bundled 'Buffer'
-data BundledSource freq b = BundledSource !Source !freq !b
+data BundledSource s freq b = BundledSource !s !freq !b
     deriving (Eq, Ord, Show)
 
 class HasSource a where
@@ -42,23 +42,27 @@ class HasSource a where
     rewind s = AL.rewind [s ^. source]
     {-# INLINE rewind #-}
 
-instance HasSource (BundledSource f b) where
-    source f (BundledSource s freq b) = f s <&> \s' -> BundledSource s' freq b
+instance HasSource Source where
+    source = id
     {-# INLINE source #-}
 
-baseFrequency :: Lens' (BundledSource freq b) freq
+instance HasSource s => HasSource (BundledSource s f b) where
+    source f (BundledSource s freq b) = source f s <&> \s' -> BundledSource s' freq b
+    {-# INLINE source #-}
+
+baseFrequency :: Lens' (BundledSource s freq b) freq
 baseFrequency f (BundledSource s freq b) = f freq <&> \freq' -> BundledSource s freq' b
 
 class HasBuffer a where
     buf :: Lens' a Buffer
 
 instance HasBuffer Buffer where
-    buf f = f
+    buf = id
     {-# INLINE buf #-}
 
-type BufferedSource = BundledSource ALfloat Buffer
+type BufferedSource = BundledSource Source ALfloat Buffer
 
-makeBundledSource :: HasBuffer b => a -> b -> IO (BundledSource a b)
+makeBundledSource :: HasBuffer b => a -> b -> IO (BundledSource Source a b)
 makeBundledSource freq b = do
     s <- genObjectName
     buffer s $= Just (b ^. buf)
